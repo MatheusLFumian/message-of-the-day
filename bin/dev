@@ -1,0 +1,56 @@
+#!/bin/bash
+
+init() {
+    self=$(which $0)
+    self_path=$(dirname $(realpath $self))
+    project_path=$(dirname $self_path)
+    compose_file_custom="${project_path}/docker-compose.yml"
+    env_file="--env-file ${project_path}/.env"
+}
+
+start() {
+    docker-compose $compose_file $env_file up -d
+}
+up() {
+    start
+}
+stop() {
+    docker-compose $compose_file $env_file stop "$@"
+}
+
+status() {
+    docker-compose $compose_file $env_file ps
+}
+
+down() {
+    docker-compose $compose_file $env_file down "$@"
+}
+
+
+rebuild() {
+    update
+    build
+    down
+    start
+}
+
+update() {
+    docker pull dunglas/frankenphp:latest-alpine
+    docker pull composer/composer:2-bin
+}
+
+restart() {
+    docker-compose $compose_file $env_file restart "$@"
+}
+
+build() {
+    docker-compose $compose_file $env_file build --no-cache
+}
+
+logs() {
+    docker-compose $compose_file $env_file logs "$@"
+}
+
+init
+
+"$@"
